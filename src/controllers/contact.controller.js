@@ -9,7 +9,12 @@ const router = express.Router();
  */
 router.get("/", async (req, res) => {
   try {
-    const { workspaceId } = req.query;
+    const { workspaceId, query } = req.query;
+
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+
+    const skip = (page - 1) * limit;
 
     const filter = {};
 
@@ -17,16 +22,36 @@ router.get("/", async (req, res) => {
       filter.workspaceId = workspaceId;
     }
 
-    const contacts = await Contact.find(filter);
+    if (query) {
+      filter.$or = [
+        { id: { $regex: query, $options: "i" } },
+        { fullName: { $regex: query, $options: "i" } }
+      ];
+    }
+
+    const [contacts, total] = await Promise.all([
+      Contact.find(filter)
+        .skip(skip)
+        .limit(limit),
+      Contact.countDocuments(filter)
+    ]);
 
     res.json({
       status: true,
-      data: contacts
+      data: contacts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page * limit < total,
+        hasPreviousPage: page > 1
+      }
     });
   } catch (error) {
     res.status(500).json({
       status: false,
-      error: error.message
+      error: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });
