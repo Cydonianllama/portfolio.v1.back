@@ -1,5 +1,6 @@
 import express from "express";
 import Contact from "../models/contact.model.js";
+import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ router.get("/", async (req, res) => {
     if (query) {
       filter.$or = [
         { id: { $regex: query, $options: "i" } },
-        { fullName: { $regex: query, $options: "i" } }
+        { fullname: { $regex: query, $options: "i" } }
       ];
     }
 
@@ -97,6 +98,7 @@ router.post("/", async (req, res) => {
     }
 
     const contact = await Contact.create({
+      id: uuidv4(),
       fullname,
       workspaceId
     });
@@ -155,13 +157,16 @@ router.put("/:id", async (req, res) => {
  */
 router.delete("/:id", async (req, res) => {
   try {
-    const contact = await Contact.findByIdAndDelete(req.params.id);
+    console.log('Deleting contact with id:', req.params.id); // Debug log
+    const contact = await Contact.findOneAndDelete({ id: req.params.id });
 
     if (!contact) {
-      return res.status(404).json({
+      res.status(404).json({
         status: false,
         error: "Contact not found"
       });
+
+      return;
     }
 
     res.json({

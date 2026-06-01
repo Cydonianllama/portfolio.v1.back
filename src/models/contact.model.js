@@ -1,6 +1,13 @@
 import mongoose from "mongoose";
 
 export const contactSchema = new mongoose.Schema({
+
+  id: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  
   fullname: {
     type: String,
     required: true,

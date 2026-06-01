@@ -1,5 +1,6 @@
 import express from "express";
 import Message from "../models/message.model.js";
+import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.get("/:contactId", async (req, res) => {
     ]);
 
     res.json({
+      status: true,
       data: messages,
       pagination: {
         page,
@@ -34,6 +36,7 @@ router.get("/:contactId", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      status: false,
       message: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
@@ -44,12 +47,12 @@ router.post("/", async (req, res) => {
   try {
     const { contactId, content, messageType } = req.body;
 
-    const message = new Message({ contactId, content, messageType });
+    const message = new Message({ contactId, content, messageType, id: uuidv4() });
     await message.save();
 
-    res.status(201).json(message);
+    res.status(201).json({ status: true, data: message });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ status: false, message: error.message });
   }
 });
 

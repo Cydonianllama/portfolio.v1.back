@@ -1,5 +1,5 @@
+// bd
 import mongoose from 'mongoose';
-
 const MONGO_URI = 'mongodb://localhost:27017/portfoliov1' //process.env.MONGO_URI!;
 
 /*
@@ -9,6 +9,8 @@ mongoose.connection.readyState
 2 = connecting
 3 = disconnecting
 */
+
+
 
 export async function setupMongo() {
   try {
