@@ -1,6 +1,7 @@
 import express from "express";
 import Message from "../models/message.model.js";
 import { v4 as uuidv4 } from "uuid";
+import { websocket } from "../setup.websocket.js";
 
 const router = express.Router();
 
@@ -49,6 +50,9 @@ router.post("/", async (req, res) => {
 
     const message = new Message({ contactId, content, messageType, id: uuidv4() });
     await message.save();
+
+    // Emitir evento de nuevo mensaje a través de WebSocket
+    websocket.to(contactId).emit("newMessage", { contactId, message});
 
     res.status(201).json({ status: true, data: message });
   } catch (error) {
