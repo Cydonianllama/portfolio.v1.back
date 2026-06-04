@@ -8,7 +8,13 @@ const router = express.Router();
 /* listar los workspaces */
 router.get("/", async (req, res) => {
   try {
-    const {  } = req.params;
+    const { userId } = req.query;
+
+    let filter = {}
+
+    if (userId){
+      filter.mainUserId = userId
+    }
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.max(1, parseInt(req.query.limit) || 20);
@@ -16,11 +22,11 @@ router.get("/", async (req, res) => {
     const skip = (page - 1) * limit;
 
     const [workspaces, total] = await Promise.all([
-      Workspace.find({  })
+      Workspace.find(filter)
         .sort({ creationDate: -1 })
         .skip(skip)
         .limit(limit),
-      Workspace.countDocuments({  })
+      Workspace.countDocuments(filter)
     ]);
 
     res.json({

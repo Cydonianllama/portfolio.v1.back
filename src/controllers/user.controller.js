@@ -133,5 +133,42 @@ router.post("/:userId/workspaces/:workspaceId", async (req, res) => {
   }
 });
 
+/* quitar asociacion de workspace */
+router.delete("/:userId/workspaces/:workspaceId", async (req, res) => {
+  try {
+    const { userId, workspaceId } = req.params;
+
+    console.log({ userId, workspaceId })
+
+    const user = await User.findOne({ id: userId });
+    const workspace = await Workspace.findOne({ id: workspaceId });
+
+    if (!user || !workspace) {
+      return res.status(404).json({
+        status: false,
+        message: "User or Workspace not found"
+      });
+    }
+
+    workspace.mainUserId = null;
+
+    await workspace.save();
+
+    res.json({
+      status: true,
+      data: {
+        user,
+        workspace
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      status: false,
+      message: error.message
+    });
+  }
+});
+
 
 export default router;
