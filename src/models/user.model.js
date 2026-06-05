@@ -8,6 +8,18 @@ export const userSchema = new mongoose.Schema({
     trim: true
   },
 
+  status: {
+    type: Number, //1 actived - 2 desactivated
+    required: true,
+    trim: true,
+  },
+
+  isVerified: {
+    type: Boolean, 
+    required: true,
+    trim: true,
+  },
+
   email: {
     type: String,
     required: true,
@@ -36,6 +48,17 @@ export const userSchema = new mongoose.Schema({
   creationDate: {
     type: Date,
     default: Date.now
+  },
+
+  optValidationCode: {
+    type: String,
+    required: false,
+    trim: true
+  },
+
+  validationOptDate: {
+    type: Date,
+    required: false,
   },
 
 });
