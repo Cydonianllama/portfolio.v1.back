@@ -8,12 +8,19 @@ const router = express.Router();
 /* listar los workspaces */
 router.get("/", async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, query } = req.query;
 
     let filter = {}
 
-    if (userId){
+    if (userId) {
       filter.mainUserId = userId
+    }
+
+    if (query) {
+      filter.$or = [
+        { name: { $regex: query, $options: "i" } },
+        // { fullname: { $regex: query, $options: "i" } }
+      ];
     }
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -41,7 +48,7 @@ router.get("/", async (req, res) => {
         hasPreviousPage: page > 1
       }
     });
-    
+
   } catch (error) {
     res.status(500).json({
       status: false,

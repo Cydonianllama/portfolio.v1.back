@@ -3,6 +3,7 @@ export const ToUserDTO = (user) => {
     id: user.id,
     fullname: user.fullname,
     username: user.username,
-    email: user.email
+    email: user.email,
+    creationDate: user.creationDate
   };
 }

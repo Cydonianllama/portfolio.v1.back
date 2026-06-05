@@ -11,19 +11,28 @@ const router = express.Router();
 /* listar los usuarios */
 router.get("/", async (req, res) => {
   try {
-    const {  } = req.params;
+    const { query } = req.query
+    const { } = req.params;
 
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.max(1, parseInt(req.query.limit) || 20);
 
     const skip = (page - 1) * limit;
 
+    let filter = {}
+
+    if (query) {
+      filter.$or = [
+        { fullname: { $regex: query, $options: "i" } }
+      ]
+    }
+
     const [users, total] = await Promise.all([
-      User.find({  })
+      User.find(filter)
         .sort({ creationDate: -1 })
         .skip(skip)
         .limit(limit),
-      User.countDocuments({  })
+      User.countDocuments(filter)
     ]);
 
     res.json({
@@ -38,7 +47,7 @@ router.get("/", async (req, res) => {
         hasPreviousPage: page > 1
       }
     });
-    
+
   } catch (error) {
     res.status(500).json({
       status: false,
@@ -47,44 +56,90 @@ router.get("/", async (req, res) => {
   }
 });
 
-/* crear user */
+/* listar user */
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ status: false, message: "User not found" });
+    }
+
+    res.json({ status: true, data: ToUserDTO(user) });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
+  }
+});
+
+/* crear usuario */
 router.post("/", async (req, res) => {
   try {
     const { fullname, username, password, email } = req.body;
 
     const finalPassword = await hashPassword(password);
-
     const user = new User({ fullname, username, password: finalPassword, email, id: uuidv4() });
     await user.save();
 
-    res.status(201).json({ status: true, data: user });
+    res.status(201).json({ status: true, data: ToUserDTO(user) });
   } catch (error) {
     res.status(500).json({ status: false, message: error.message });
   }
 });
+
+/* actualizar usuario */
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params
+    const { email, fullname, username } = req.body;
+
+    let toUpdate = {}
+
+    if (email) toUpdate.email = email;
+    if (fullname) toUpdate.fullname = fullname;
+    if (username) toUpdate.username = username;
+
+    const user = await User.findOneAndUpdate({ id: id }, toUpdate, { new: true })
+
+    if (!user) {
+      res.status(404).json({ status: false, message: 'User not founded' });
+      return;
+    }
+
+    res.status(200).json({ status: true, data: ToUserDTO(user) });
+  } catch (ex) {
+    res.status(500).json({ status: false, message: ex.message });
+  }
+})
+
+/* actualizar contraseña de usuario */
+router.put('/:id/pass', async (req, res) => {
+  try {
+    const { id } = req.params
+    const { newPassword } = req.body;
+    const finalPassword = await hashPassword(newPassword);
+    let toUpdate = {}
+    if (finalPassword) toUpdate.password = finalPassword;
+
+    const user = await User.findOneAndUpdate({ id: id }, toUpdate, { new: true })
+
+    if (!user) {
+      res.status(404).json({ status: false, message: 'User not founded' });
+      return;
+    }
+
+    res.status(200).json({ status: true, data: user });
+  } catch (ex) {
+    res.status(500).json({ status: false, message: ex.message });
+  }
+})
 
 /* eliminar user */
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const user = await User.findByIdAndDelete(id);
-
-    if (!user) {
-      return res.status(404).json({ status: false, message: "User not found" });
-    }
-
-    res.json({ status: true, data: user });
-  } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
-  }
-});
-
-/* listar user */
-router.get("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const user = await User.findById(id);
+    const user = await User.findOneAndDelete({ id });
 
     if (!user) {
       return res.status(404).json({ status: false, message: "User not found" });
@@ -120,7 +175,7 @@ router.post("/:userId/workspaces/:workspaceId", async (req, res) => {
     res.json({
       status: true,
       data: {
-        user,
+        user: ToUserDTO(user),
         workspace
       }
     });
@@ -157,7 +212,7 @@ router.delete("/:userId/workspaces/:workspaceId", async (req, res) => {
     res.json({
       status: true,
       data: {
-        user,
+        user: ToUserDTO(user),
         workspace
       }
     });

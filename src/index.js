@@ -5,6 +5,7 @@ import contactController from './controllers/contact.controller.js';
 import messageController from './controllers/message.controller.js';
 import userController from './controllers/user.controller.js';
 import workspaceController from './controllers/workspace.controller.js';
+import adminController from './controllers/admin/admin.controller.js'
 import dotenv from "dotenv";
 import cors from "cors";
 import { setupWebSocket } from './setup.websocket.js';
@@ -31,6 +32,7 @@ app.use('/api/contacts', contactController);
 app.use('/api/messages', messageController);
 app.use('/api/users', userController);
 app.use('/api/workspaces', workspaceController);
+app.use('/api/admin', adminController);
 
 await setupMongo();
 await setupWebSocket(app);
