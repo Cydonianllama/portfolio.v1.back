@@ -4,7 +4,7 @@ new Worker(
   "open-chat",
   async (job) => {
 
-    console.log("Enviando correo a:", job.data.email);
+    console.log("Enviando correo a:", job.data?.email);
 
     // simulación
     await new Promise(resolve =>
@@ -14,4 +14,4 @@ new Worker(
     console.log("Correo enviado");
 
   }
-);
+);a

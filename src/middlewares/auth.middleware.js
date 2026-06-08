@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import User from '../models/user.model'
 
 export const auth = (
   req,
@@ -24,6 +25,16 @@ export const auth = (
     );
 
     req.user = payload;
+    
+    // listar la data del usuario
+    const user = await User.findOne({ id: payload.userId, status: 1 })
+
+    if (!user){
+      res.status(404).json({ status: false, message: 'User not found', origin: 'auth'})
+      return;
+    }
+
+    req.userData = user.toObject();
 
     next();
 
