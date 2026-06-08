@@ -1,5 +1,5 @@
 import express from "express";
-import Contact from "../models/contact.model.js";
+import Contact from "@models/contact.model.js";
 import { v4 as uuidv4 } from "uuid";
 
 const router = express.Router();
@@ -12,12 +12,12 @@ router.get("/", async (req, res) => {
   try {
     const { workspaceId, query } = req.query;
 
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    const page = Math.max(1, parseInt(String(req.query.page)) || 1);
+    const limit = Math.max(1, parseInt(String(req.query.limit)) || 20);
 
     const skip = (page - 1) * limit;
 
-    const filter = {};
+    const filter: any = {};
 
     if (workspaceId) {
       filter.workspaceId = workspaceId;
@@ -78,7 +78,7 @@ router.get("/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      error: error.message
+      error: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });
@@ -110,7 +110,7 @@ router.post("/", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      error: error.message
+      error: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });
@@ -147,7 +147,7 @@ router.put("/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      error: error.message
+      error: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });
@@ -175,7 +175,7 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      error: error.message
+      error: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });

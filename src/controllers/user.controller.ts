@@ -1,10 +1,10 @@
 import express from "express";
-import User from "../models/user.model.js";
-import Workspace from "../models/workspace.model.js";
+import User from "@models/user.model.js";
+import Workspace from "@models/workspace.model.js";
 import { v4 as uuidv4 } from "uuid";
-import { websocket } from "../setup.websocket.js";
-import { hashPassword } from "../utils/crypt.js";
-import { ToUserDTO } from "../mappers/user.js";
+
+import { hashPassword } from "@utils/crypt.js";
+import { ToUserDTO } from "@mappers/user.js";
 
 const router = express.Router();
 
@@ -14,12 +14,12 @@ router.get("/", async (req, res) => {
     const { query } = req.query
     const { } = req.params;
 
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    const page = Math.max(1, parseInt(String(req.query.page)) || 1);
+    const limit = Math.max(1, parseInt(String(req.query.limit)) || 20);
 
     const skip = (page - 1) * limit;
 
-    let filter = {}
+    let filter: any = {}
 
     if (query) {
       filter.$or = [
@@ -68,7 +68,7 @@ router.get("/:id", async (req, res) => {
 
     res.json({ status: true, data: ToUserDTO(user) });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 
@@ -83,7 +83,7 @@ router.post("/", async (req, res) => {
 
     res.status(201).json({ status: true, data: ToUserDTO(user) });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 
@@ -93,7 +93,7 @@ router.put("/:id", async (req, res) => {
     const { id } = req.params
     const { email, fullname, username } = req.body;
 
-    let toUpdate = {}
+    let toUpdate: any = {}
 
     if (email) toUpdate.email = email;
     if (fullname) toUpdate.fullname = fullname;
@@ -107,8 +107,8 @@ router.put("/:id", async (req, res) => {
     }
 
     res.status(200).json({ status: true, data: ToUserDTO(user) });
-  } catch (ex) {
-    res.status(500).json({ status: false, message: ex.message });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 })
 
@@ -118,7 +118,7 @@ router.put('/:id/pass', async (req, res) => {
     const { id } = req.params
     const { newPassword } = req.body;
     const finalPassword = await hashPassword(newPassword);
-    let toUpdate = {}
+    let toUpdate: any = {}
     if (finalPassword) toUpdate.password = finalPassword;
 
     const user = await User.findOneAndUpdate({ id: id }, toUpdate, { new: true })
@@ -129,8 +129,8 @@ router.put('/:id/pass', async (req, res) => {
     }
 
     res.status(200).json({ status: true, data: user });
-  } catch (ex) {
-    res.status(500).json({ status: false, message: ex.message });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 })
 
@@ -147,7 +147,7 @@ router.delete("/:id", async (req, res) => {
 
     res.json({ status: true, data: user });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 
@@ -183,7 +183,7 @@ router.post("/:userId/workspaces/:workspaceId", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      message: error.message
+      message: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });
@@ -220,7 +220,7 @@ router.delete("/:userId/workspaces/:workspaceId", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      message: error.message
+      message: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });

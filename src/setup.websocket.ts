@@ -1,10 +1,11 @@
 // websocket
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { type Express } from 'express'
 
-export let websocket = null;
+export let websocket: Server | null = null;
 
-export function setupWebSocket(app) {
+export function setupWebSocket(app: Express) {
   const httpServer = createServer(app);
 
   let io = new Server(httpServer, {

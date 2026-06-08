@@ -1,8 +1,8 @@
 import express from "express";
-import Message from "../models/message.model.js";
+import Message from "@models/message.model.js";
 import { v4 as uuidv4 } from "uuid";
 import { websocket } from "../setup.websocket.js";
-import { openChatQueue } from '../queues/open.chat.queue.js'
+// import { openChatQueue } from '../queues/open.chat.queue.js'
 
 const router = express.Router();
 
@@ -21,8 +21,8 @@ router.get('/open/:contactId', async (req, res) => {
 
 
     // listar los mensajes
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    const page = Math.max(1, parseInt(String(req.query.page)) || 1);
+    const limit = Math.max(1, parseInt(String(req.query.limit)) || 20);
 
     const skip = (page - 1) * limit;
 
@@ -64,11 +64,11 @@ router.post("/send-message", async (req, res) => {
     await message.save();
 
     // Emitir evento de nuevo mensaje a través de WebSocket
-    websocket.to(contactId).emit("newMessage", { contactId, message });
+    websocket?.to(contactId)?.emit("newMessage", { contactId, message });
 
     res.status(201).json({ status: true, data: message });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 

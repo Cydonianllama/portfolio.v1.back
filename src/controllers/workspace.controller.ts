@@ -1,5 +1,5 @@
 import express from "express";
-import Workspace from "../models/workspace.model.js";
+import Workspace from "@models/workspace.model.js";
 import { v4 as uuidv4 } from "uuid";
 import { websocket } from "../setup.websocket.js";
 
@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
   try {
     const { userId, query } = req.query;
 
-    let filter = {}
+    let filter: any = {}
 
     if (userId) {
       filter.mainUserId = userId
@@ -23,8 +23,8 @@ router.get("/", async (req, res) => {
       ];
     }
 
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    const page = Math.max(1, parseInt(String(req.query.page)) || 1);
+    const limit = Math.max(1, parseInt(String(req.query.limit)) || 20);
 
     const skip = (page - 1) * limit;
 
@@ -67,7 +67,7 @@ router.post("/", async (req, res) => {
 
     res.status(201).json({ status: true, data: workspace });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 
@@ -84,7 +84,7 @@ router.delete("/:id", async (req, res) => {
 
     res.json({ status: true, data: workspace });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 
@@ -100,7 +100,7 @@ router.get("/:id", async (req, res) => {
 
     res.json({ status: true, data: workspace });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 

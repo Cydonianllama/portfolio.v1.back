@@ -1,25 +1,27 @@
 import express from "express";
-import Automation from "../models/message.model.js";
+import Automation from "@models/automation.model.js";
 import { v4 as uuidv4 } from "uuid";
-import { websocket } from "../setup.websocket.js";
-import { CreateAutomation } from '../services/automationService.js'
+import { websocket } from "../setup.websocket.js"
+import { CreateAutomation } from '@services/automation/createAutomation.js'
+import { type Request, type Response } from "express";
 
 const router = express.Router();
 
 /* listar automatizaciones dashboard */
 
 /* listar automatizaciones */
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
+
     const { query } = req.query
     const { } = req.params;
 
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    const page = Math.max(1, parseInt(String(req.query?.page) || '') || 1);
+    const limit = Math.max(1, parseInt(String(req.query?.limit) || '') || 20);
 
     const skip = (page - 1) * limit;
 
-    let filter = {}
+    let filter: any = {}
 
     if (query) {
       filter.$or = [
@@ -57,7 +59,7 @@ router.get("/", async (req, res) => {
 });
 
 /* listar automatizacion */
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const automation = await Automation.findById(id);
@@ -68,12 +70,12 @@ router.get("/:id", async (req, res) => {
 
     res.json({ status: true, data: automation });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 
 /* crear automatizacion */
-router.post("/", async (req, res) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const userId = ''
 
@@ -86,7 +88,7 @@ router.post("/", async (req, res) => {
     
     res.status(201).json({ status: true, data: automation });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }
 });
 
@@ -101,7 +103,7 @@ router.put("/:id", async (req, res) => {
     const automation = await Automation.findByIdAndUpdate(
       req.params.id,
       {
-        fullname,
+        title,
         workspaceId
       },
       {
@@ -123,17 +125,17 @@ router.put("/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      error: error.message
+      error: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });
 
 /* eliminar automatizacion */
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", async (req: Request, res: Response) => {
   try {
     console.log('Deleting automation with id:', req.params.id); // Debug log
 
-    const automation = await Automation.findOneAndDelete({ id: req.params.id });
+    const automation = await Automation.findOneAndDelete({ id: String(req.params.id) });
 
     if (!automation) {
       res.status(404).json({
@@ -150,7 +152,7 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({
       status: false,
-      error: error.message
+      error: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });

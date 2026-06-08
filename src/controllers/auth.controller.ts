@@ -1,12 +1,11 @@
 import express from "express";
-import Workspace from "../models/workspace.model.js";
-import User from "../models/user.model.js";
+import User from "@models/user.model.js";
 import { v4 as uuidv4 } from "uuid";
 import { websocket } from "../setup.websocket.js";
-import { verifyPassword } from '../utils/crypt.js'
-import { generateOtp } from '../utils/opt.js'
-import { buildSession } from '../services/authService.js'
-import jwt from 'jsonwebtoken'
+import { verifyPassword } from '@utils/crypt.js'
+import { generateOtp } from '@utils/opt.js'
+import { buildSession } from '@services/authService.js'
+import bcrypt from 'bcrypt'
 
 // TODO: mejorar el tema de los tokens
 
@@ -48,10 +47,10 @@ router.post(`/login`, async (req, res) => {
       }
     })
 
-  } catch (ex) {
+  } catch (error) {
     res.status(500).json({
       status: false,
-      message: ex.message
+      message: error instanceof Error ? error.message : "Internal Server Error"
     })
   }
 })
@@ -78,7 +77,7 @@ router.post("/verify", async (req, res) => {
       });
     }
 
-    if (user.otpValidationCode !== otp.trim()) {
+    if (user.optValidationCode !== otp.trim()) {
       return res.status(422).json({
         status: false,
         message: "OTP not valid"
@@ -106,10 +105,10 @@ router.post("/verify", async (req, res) => {
       }
     });
 
-  } catch (ex) {
+  } catch (error) {
     return res.status(500).json({
       status: false,
-      message: ex.message
+      message: error instanceof Error ? error.message : "Internal Server Error"
     });
   }
 });
@@ -128,7 +127,7 @@ router.post(`/register`, async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = User.create({
+    const user = await User.create({
       email,
       password: passwordHash,
       fullname,
@@ -139,8 +138,6 @@ router.post(`/register`, async (req, res) => {
       validationOptDate: new Date().toISOString(),
       isVerified: false
     });
-
-    await user.save()
 
     const token = await buildSession({
       userId: user.id
@@ -153,10 +150,10 @@ router.post(`/register`, async (req, res) => {
       }
     });
 
-  } catch (ex) {
+  } catch (error) {
     res.status(500).json({
       status: false,
-      message: ex.message
+      message: error instanceof Error ? error.message : "Internal Server Error"
     })
   }
 })
