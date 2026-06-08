@@ -1,5 +1,5 @@
 import express from "express";
-import Automation from "@models/automation.model.js";
+import Automation from "@schemas/automation.schema.js";
 import { v4 as uuidv4 } from "uuid";
 import { websocket } from "../setup.websocket.js"
 import { CreateAutomation } from '@services/automation/createAutomation.js'

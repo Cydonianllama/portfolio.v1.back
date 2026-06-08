@@ -1,6 +1,6 @@
 import express from "express";
-import User from "@models/user.model.js";
-import Workspace from "@models/workspace.model.js";
+import User from "@schemas/user.schema.js";
+import Workspace from "@schemas/workspace.schema.js";
 import { v4 as uuidv4 } from "uuid";
 
 import { hashPassword } from "@utils/crypt.js";

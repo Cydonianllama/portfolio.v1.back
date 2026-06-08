@@ -1,5 +1,5 @@
 import express from "express";
-import User from "@models/user.model.js";
+import User from "@schemas/user.schema.js";
 import { v4 as uuidv4 } from "uuid";
 import { websocket } from "../setup.websocket.js";
 import { verifyPassword } from '@utils/crypt.js'

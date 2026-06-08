@@ -53,6 +53,8 @@
       "@services/*": ["./src/services/*"],
       "@utils/*": ["./src/utils/*"],
       "@workers/*": ["./src/workers/*"],
+      "@schemas/*": ["./src/schemas/*"],
+      "@dtos/*": ["./src/dtos/*"]
     }
   }
 }

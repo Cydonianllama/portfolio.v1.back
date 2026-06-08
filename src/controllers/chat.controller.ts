@@ -1,5 +1,5 @@
 import express from "express";
-import Message from "@models/message.model.js";
+import Message from "@schemas/message.schema.js";
 import { v4 as uuidv4 } from "uuid";
 import { websocket } from "../setup.websocket.js";
 // import { openChatQueue } from '../queues/open.chat.queue.js'
