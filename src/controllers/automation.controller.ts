@@ -2,8 +2,12 @@ import express from "express";
 import Automation from "@schemas/automation.schema.js";
 import { v4 as uuidv4 } from "uuid";
 import { websocket } from "../setup.websocket.js"
-import { CreateAutomation } from '@services/automation/createAutomation.js'
+import { CreateAutomation } from 'services/automation/create-automation.js'
 import { type Request, type Response } from "express";
+import type { CreateAutomationResponseDTO } from "dtos/automation/create-automation.response.dto.js";
+import type { ResponseAPI } from "types/response.js";
+import type { CreateAutomationRequestDTO } from "dtos/automation/create-automation.request.dto.js";
+import { AutomationStatus } from "models/automation.js";
 
 const router = express.Router();
 
@@ -59,7 +63,7 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 /* listar automatizacion */
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", async (req: Request<{ id: string }, {}, CreateAutomationResponseDTO>, res: Response) => {
   try {
     const { id } = req.params;
     const automation = await Automation.findById(id);
@@ -68,25 +72,34 @@ router.get("/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ status: false, message: "Automation not found" });
     }
 
-    res.json({ status: true, data: automation });
+    res.json({ status: true, data: { automation: automation } });
+
   } catch (error) {
-    res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
+    res.status(500).json({ 
+      status: false, 
+      message: error instanceof Error ? error.message : "Internal Server Error" 
+    });
   }
 });
 
 /* crear automatizacion */
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", async (req: Request<{}, {}, CreateAutomationRequestDTO>, res: Response<ResponseAPI<CreateAutomationResponseDTO>>) => {
   try {
     const userId = ''
 
     const { title, workspaceId } = req.body;
 
-    // status: 3 -> draft
-    const automationStatus = 3;
+    const automationStatus = AutomationStatus.draft;
 
-    const automation = await CreateAutomation({ id: uuidv4(), title, status: automationStatus, workspaceId, creationUserId: userId })
+    const automation = await CreateAutomation({ 
+      id: uuidv4(), 
+      title: title || '', 
+      status: automationStatus, 
+      workspaceId: workspaceId || '', 
+      creationUserId: userId,
+    })
     
-    res.status(201).json({ status: true, data: automation });
+    res.status(201).json({ status: true, data: { automation: automation } });
   } catch (error) {
     res.status(500).json({ status: false, message: error instanceof Error ? error.message : "Internal Server Error" });
   }

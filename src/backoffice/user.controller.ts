@@ -13,12 +13,12 @@ router.get("/users", async (req, res) => {
     const { query } = req.query
     const { } = req.params;
 
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    const page = Math.max(1, parseInt(String(req.query.page)) || 1);
+    const limit = Math.max(1, parseInt(String(req.query.limit)) || 20);
 
     const skip = (page - 1) * limit;
 
-    let filter = {}
+    let filter: any = {}
 
     if (query) {
       filter.$or = [

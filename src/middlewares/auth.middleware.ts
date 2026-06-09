@@ -1,10 +1,12 @@
 import jwt from "jsonwebtoken";
 import User from '../schemas/user.schema.js'
+import { type Response, type Request, type NextFunction } from "express";
+import { UserStatus, type IUser } from "models/user.model.js";
 
-export const auth = (
-  req,
-  res,
-  next
+export const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const authHeader =
@@ -20,21 +22,21 @@ export const auth = (
       authHeader.split(" ")[1];
 
     const payload = jwt.verify(
-      token,
-      process.env.JWT_SECRET
+      token || '',
+      process.env.JWT_SECRET || ''
     );
-
-    req.user = payload;
     
+    let payloadUser = payload as { userId: string }
+
     // listar la data del usuario
-    const user = await User.findOne({ id: payload.userId, status: 1 })
+    const user = await User.findOne({ id: payloadUser?.userId || '', status: UserStatus.actived })
 
     if (!user){
       res.status(404).json({ status: false, message: 'User not found', origin: 'auth'})
       return;
     }
 
-    req.userData = user.toObject();
+    req.user = user.toObject() as IUser;
 
     next();
 
