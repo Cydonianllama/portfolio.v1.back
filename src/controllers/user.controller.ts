@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { hashPassword } from "@utils/crypt.js";
 import { ToUserDTO } from "@mappers/user.js";
+import { UserStatus } from "models/user.model.js";
 
 const router = express.Router();
 
@@ -75,10 +76,22 @@ router.get("/:id", async (req, res) => {
 /* crear usuario */
 router.post("/", async (req, res) => {
   try {
-    const { fullname, username, password, email } = req.body;
+    const { fullname, username, email } = req.body;
 
-    const finalPassword = await hashPassword(password);
-    const user = new User({ fullname, username, password: finalPassword, email, id: uuidv4() });
+    // temporary pass
+    const PASS = 'test'
+
+    const finalPassword = await hashPassword(PASS);
+    const user = new User({ 
+      fullname, 
+      username, 
+      password: finalPassword, 
+      email, 
+      id: uuidv4(), 
+      status: UserStatus.actived,
+      isVerified: true 
+    });
+    
     await user.save();
 
     res.status(201).json({ status: true, data: ToUserDTO(user) });

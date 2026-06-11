@@ -8,7 +8,7 @@ import { ToUserDTO } from "../mappers/user.js";
 const router = express.Router();
 
 /* listar los usuarios para admin */
-router.get("/users", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { query } = req.query
     const { } = req.params;

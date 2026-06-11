@@ -8,11 +8,11 @@ import { ToUserDTO } from "../mappers/user.js";
 const router = express.Router();
 
 /* listar workpaces para admin */
-router.get("/workspaces", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const { userId, query } = req.query;
 
-    let filter = {}
+    let filter: any = {}
 
     if (userId) {
       filter.mainUserId = userId
@@ -25,8 +25,8 @@ router.get("/workspaces", async (req, res) => {
       ];
     }
 
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit) || 20);
+    const page = Math.max(1, parseInt(String(req.query.page)) || 1);
+    const limit = Math.max(1, parseInt(String(req.query.limit)) || 20);
 
     const skip = (page - 1) * limit;
 
